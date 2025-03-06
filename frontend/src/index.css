@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .flex-cc {
+    @apply flex justify-center items-center flex-wrap;
+  }
+
+  .flex-bc {
+    @apply flex justify-between items-center;
+  }
+}
