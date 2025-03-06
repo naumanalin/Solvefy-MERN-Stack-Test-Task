@@ -4,7 +4,7 @@ import User from '../models/userModel.js';
 export const isLogedin = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
-        const token = req.cookies?.a_x_is || (authHeader?.startsWith('Bearer') ? authHeader.split(' ')[1] : null);
+        const token = req.cookies?.token || (authHeader?.startsWith('Bearer') ? authHeader.split(' ')[1] : null);
 
         if (!token) {
             return res.status(401).json({ success: false, message: "unauthorized access, plz login to use this service" });

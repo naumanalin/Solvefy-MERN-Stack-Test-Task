@@ -70,7 +70,7 @@ export const login = async (req, res) => {
         const token = jwt.sign({ _id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: `${d}d` });
 
         // Set cookie properly
-        res.cookie('a_x_is', token, {
+        res.cookie('token', token, {
            // httpOnly: true,
             secure: false,
             maxAge: d * 24 * 60 * 60 * 1000, 
@@ -90,7 +90,7 @@ export const login = async (req, res) => {
 // ------------------------------------------------------------------------------------------------------------------------
 export const logout = async (req, res) => {
     try {
-        res.cookie('a_x_is', '', {
+        res.cookie('token', '', {
             secure: false,
             expires: new Date(0),
             path: '/',
@@ -109,69 +109,112 @@ export const user = async (req, res)=>{
     const user = req.user;
     res.status(200).json({success:true, user})
 }
-
-
 // ------------------------------------------------------------------------------------------------------------------------
-export const verifyAccountReq = async (req, res)=>{
+export const changePassword = async (req, res) => {
     try {
-        const user = req.user;
-
-        if (user.verified) {
-            return res.status(400).json({ success: false, message: "Account is already verified." });
+        if (!req.user) {
+            return res.status(401).json({ success: false, message: "Unauthorized access." });
         }
 
-        const email_verification_code = Math.floor(1000 + Math.random() * 9000).toString();
-        
-        // Save verification code to user
-        user.email_verification_code = email_verification_code;
+        const { password, newPassword, confPassword } = req.body;
+        const userId = req.user._id;
+
+        if (!password || !newPassword || !confPassword) {
+            return res.status(400).json({ success: false, message: "All fields are required to update your password." });
+        }
+
+        if (newPassword !== confPassword) {
+            return res.status(400).json({ success: false, message: "Confirm password did not match!" });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ success: false, message: "Invalid current password." });
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // Update password in the database
+        user.password = hashedPassword;
         await user.save();
 
-        // Send email
-        const send_email = await sendEmail(user.name, user.email, email_verification_code);
-        if (!send_email) {
-            return res.status(500).json({ success: false, message: "Failed to send verification email." });
-        }
-
-        res.status(200).json({ success: true, message: "Verification email sent successfully." });
-
+        res.status(200).json({ success: true, message: "Password updated successfully." });
     } catch (error) {
-        console.error("Error in verifyAccountReq:", error);
-        res.status(500).json({ success: false, message: "Internal server error." });
+        console.error("Error in changing password:", error);
+        res.status(500).json({ success: false, message: "Internal server error.", error });
     }
-}
+};
+
+
 // -------------------------------------------------------------------------------------------------------------------------
-export const verifyAccount = async (req, res)=>{ 
+export const uploadProfilePicture = async (req, res) => {
     try {
         const user = req.user;
-        const {email, verification_code} = req.body;
-        if(!email || !verification_code){
-            return res.status(400).json({success:false, message:"Email or Verification code did not fount?"});
-        };
-
-        if(email !== user.email){
-            return res.status(400).json({success:false, message:"Email did not match?"});
+        
+        if (!req.file) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "No file uploaded" 
+            });
         }
 
-        if(user.verified){
-            return res.status(400).json({success:false, message:"Dear user your account is already verified!"})
+        // Delete old picture if exists
+        if (user.picture) {
+            const oldPath = path.join('public', user.picture);
+            if (fs.existsSync(oldPath)) {
+                fs.unlinkSync(oldPath);
+            }
         }
 
-        if(user.email_verification_code != verification_code){
-            return res.status(400).json({ success: false, message: "Invalid verification code." });
-        }
+        // Update with correct path
+        const updatedUser = await User.findByIdAndUpdate(
+            user._id,
+            { picture: `/uploads/${req.file.filename}` },
+            { new: true }
+        ).select("-password");
 
-        user.verified = true;
-        user.email_verification_code = null;
-        await user.save();
+        res.status(200).json({
+            success: true,
+            message: "Profile picture updated",
+            user: updatedUser
+        });
 
-        res.status(200).json({success:true, message:'🎉 Account Verified Successfully.'})
     } catch (error) {
+        console.error("Upload error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to update profile picture"
+        });
+    }
+};
+
+// ------------------------------------------------------------------------------------------------------------------------
+export const updateProfile = async (req, res) => {
+    try {
+        const user = req.user;
+        const { name, email } = req.body;
+
+        if (!name || !email) {
+            return res.status(400).json({ success: false, message: "Name and email are required." });
+        }
+
+        const emailExists = await User.findOne({ email });
+        if (emailExists && emailExists._id.toString() !== user._id.toString()) {
+            return res.status(409).json({ success: false, message: "Email is already in use by another account." });
+        }
+
+        await User.findByIdAndUpdate(user._id, { name, email });
+        res.status(200).json({ success: true, message: "Profile updated successfully." });
+    } catch (error) {
+        console.error("Error in updating profile:", error);
         res.status(500).json({ success: false, message: "Internal server error." });
     }
-
-}
-// ------------------------------------------------------------------------------------------------------------------------
-export const forgetPassword = async (req, res)=>{
-
-}
+};
 

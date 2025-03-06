@@ -18,9 +18,10 @@ const app = express()
 
 // middlewares
 app.use(express.json());
+app.use(express.static('public'));
 app.use(cookieParser());
 app.use(cors({
-    origin: ["http://localhost:5173", "https://budget-tracker-blond-kappa.vercel.app"],
+    origin: ["http://localhost:5173", "https://budget-tracker-blond-kappa.vercel.app", FRONTEND_URL],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }))
@@ -32,7 +33,7 @@ app.get('/', (req, res)=>{
 })
 
 // All Routes
-app.use('/api/user', userRoutes);
+app.use('/api', userRoutes);
 
 
 app.listen(PORT, () => {
