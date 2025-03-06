@@ -2,8 +2,10 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-const uploadPath = 'public/uploads';
+// Use /tmp directory for Vercel compatibility
+const uploadPath = '/tmp/uploads';
 
+// Create directory if it doesn't exist
 if (!fs.existsSync(uploadPath)) {
     fs.mkdirSync(uploadPath, { recursive: true });
 }

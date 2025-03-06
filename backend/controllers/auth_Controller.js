@@ -165,18 +165,14 @@ export const uploadProfilePicture = async (req, res) => {
             });
         }
 
-        // Delete old picture if exists
-        if (user.picture) {
-            const oldPath = path.join('public', user.picture);
-            if (fs.existsSync(oldPath)) {
-                fs.unlinkSync(oldPath);
-            }
-        }
+        // For Vercel deployments, files are stored in /tmp which is ephemeral
+        // Consider using cloud storage instead for production
+        const fileUrl = `/uploads/${req.file.filename}`;
 
-        // Update with correct path
+        // Update user with the temporary file URL
         const updatedUser = await User.findByIdAndUpdate(
             user._id,
-            { picture: `/uploads/${req.file.filename}` },
+            { picture: fileUrl },
             { new: true }
         ).select("-password");
 

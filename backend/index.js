@@ -18,7 +18,7 @@ const app = express()
 
 // middlewares
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('tmp'));
 app.use(cookieParser());
 app.use(cors({
     origin: ["http://localhost:5173", "https://budget-tracker-blond-kappa.vercel.app", FRONTEND_URL],
