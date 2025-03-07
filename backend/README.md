@@ -8,21 +8,22 @@ This backend provides API endpoints for managing:
 
 ## User/Auth End Points
 
-| No. | Title                   | Method | Route |
-|----|--------------------------|--------|--------------------------------|
-| 1  | Signup                  | POST   | `/api/user/signup`            |
-| 2  | Login                   | POST   | `/api/user/login`             |
-| 3  | Verification request    | GET    | `/api/user/verify/req`        |
-| 4  | Verify account          | POST   | `/api/user/verify/account`    |
-| 5  | Loged User Data         | GET    | `/api/user`                   | 
-| 6  | Logout                  | GET    | `/api/user/logout`            |
-| 7  | Recover/Forgot password | comming | soon ...                     |
+| No. | Title                   | Method | Base URL Like              | Route                    |
+|---- |-------------------------|--------|----------------------------|--------------------------|
+| 1   | Signup                  | POST   | `http://localhost:3000`    | `/api/signup`           |
+| 2   | Login                   | POST   | `http://localhost:3000`    | `/api/login`            |
+| 3   | Dashboard               | GET    | `http://localhost:3000`    | `/api/dashboard`        |
+| 4   | Upload Profile Picture  | POST   | `http://localhost:3000`    | `/api/upload/picture`   |
+| 5   | Update Profile Info     | POST   | `http://localhost:3000`    | `/api/update/profile`   |
+| 6   | Change Password         | POST   | `http://localhost:3000`    | `/api/change/password`  |
+| 7   | Logout                  | GET    | `http://localhost:3000`    | `/api/logout`           |
+
 
 
 ## 🧑‍💻 Users API
 ### 🔹 User Signup
 
-POST /api/user/signup - Register a new user
+POST /api/signup - Register a new user
 
 ### 📥 Request Body (JSON):
 ```json
@@ -43,7 +44,7 @@ POST /api/user/signup - Register a new user
 ### 🔹 User Login
 
 
-POST /api/user/login - Authenticate user
+POST /api/login - Authenticate user
 ### 📤 Response (JSON):
 ```json 
 {

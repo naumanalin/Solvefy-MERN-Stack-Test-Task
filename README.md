@@ -47,7 +47,7 @@ git clone https://github.com/naumanalin/Solvefy-MERN-Stack-Test-Task.git
 ```
 cd backend
 npm install
-npm 
+npm run dev 
 ```
 ### Frontend Setup:
 ```
@@ -57,13 +57,16 @@ npm run dev
 ```
 
 ## 🌐 API Endpoints
-Method	Endpoint	Description
-POST	/login
-POST  /signup
-GET   /dashboard
-POST  /upload/profile/picture
-POST  /update/profile
-GET   /logout
+
+| No. | Title                   | Method | Base URL Like              | Route                    |
+|---- |-------------------------|--------|----------------------------|--------------------------|
+| 1   | Signup                  | POST   | `http://localhost:3000`    | `/api/signup`           |
+| 2   | Login                   | POST   | `http://localhost:3000`    | `/api/login`            |
+| 3   | Dashboard               | GET    | `http://localhost:3000`    | `/api/dashboard`        |
+| 4   | Upload Profile Picture  | POST   | `http://localhost:3000`    | `/api/upload/picture`   |
+| 5   | Update Profile Info     | POST   | `http://localhost:3000`    | `/api/update/profile`   |
+| 6   | Change Password         | POST   | `http://localhost:3000`    | `/api/change/password`  |
+| 7   | Logout                  | GET    | `http://localhost:3000`    | `/api/logout`           |
 
 
 

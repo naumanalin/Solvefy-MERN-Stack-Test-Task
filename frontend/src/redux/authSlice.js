@@ -49,6 +49,37 @@ export const updateProfileInfo = createAsyncThunk(
     }
 );
 
+// Update Profile Picture
+export const updatePicture = createAsyncThunk(
+    'user/updatePicture',
+    async (file, { rejectWithValue }) => {
+        try {
+            const formData = new FormData();
+            formData.append('picture', file);
+            
+            const response = await axios.post(`${base_URL}/api/upload/picture`, formData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'multipart/form-data'
+                },
+                withCredentials: true
+            });
+
+            // Update local storage
+            const updatedUser = { 
+                ...JSON.parse(localStorage.getItem('user')), 
+                picture: response.data.user.picture 
+            };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            
+            return response.data.user;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || "Image upload failed");
+        }
+    }
+);
+
+
 const initialSidebarState = window.innerWidth >= 768;
 
 const userSlice = createSlice({
@@ -119,6 +150,22 @@ const userSlice = createSlice({
             state.error = action.error.message;
             toast.error(action.error.message);
         });
+        // Update Picture cases
+        builder.addCase(updatePicture.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        });
+        builder.addCase(updatePicture.fulfilled, (state, action) => {
+            state.loading = false;
+            state.user = action.payload;
+            toast.success('Profile picture updated!');
+        });
+        builder.addCase(updatePicture.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+            toast.error(action.payload);
+        });
+        
     }
 });
 
